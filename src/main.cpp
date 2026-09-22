@@ -38,7 +38,7 @@ extern "C" void app_main() {
     }
 
     adc_cali_handle_t calibration_handle = nullptr;
-    adc_cali_curve_fitting_config_t calibration_config = {};
+    adc_cali_curve_fitting_config_t calibration_config = {};  
     calibration_config.unit_id = ADC_UNIT_1;
     calibration_config.chan = ADC_CHANNEL;
     calibration_config.atten = ADC_ATTEN_DB_12;
@@ -68,7 +68,7 @@ extern "C" void app_main() {
         static int sampleCount = 0;
         static int samples[WINDOW_SIZE];
         static int index = 0;
-        int SMA = 0;
+        int sma = 0;
 
         err = adc_oneshot_read(adc_handle, ADC_CHANNEL, &adc_raw);
         if (err == ESP_OK) {
@@ -89,23 +89,23 @@ extern "C" void app_main() {
 
           // Calculate sum
           for(int num : samples) {
-            SMA += num;
+            sma += num;
           }
 
           // Calculate average
-          SMA = SMA / sampleCount;
+          sma = sma / sampleCount;
 
-          if(SMA < THRESHOLD_LOW) {
+          if(sma < THRESHOLD_LOW) {
             ledState = false;
             gpio_set_level(LED_OUT, ledState);
-          } else if (SMA > THRESHOLD_HIGH) {
+          } else if (sma > THRESHOLD_HIGH) {
             ledState = true;
             gpio_set_level(LED_OUT, ledState);
           }
 
           adc_cali_raw_to_voltage(calibration_handle, adc_raw, &voltage_mv);
 
-          printf("ADC GPIO4: raw=%d, voltage=%d mV, SMA = %d\n", adc_raw, voltage_mv, SMA);
+          printf("ADC GPIO4: raw=%d, voltage=%d mV, SMA = %d\n", adc_raw, voltage_mv, sma);
         } else {
             printf("Failed to read ADC, err = %d\n", err);
         }
