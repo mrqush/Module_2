@@ -15,17 +15,17 @@
 #define LED_POT_CHANNEL ADC_CHANNEL_3
 #define MOTOR_POT_CHANNEL ADC_CHANNEL_4
 
-static constexpr int ADC_MAX_VALUE = 4095;
-static constexpr int ADC_SAMPLE_COUNT = 16;
-
 static constexpr int ADC_LOW_LIMIT = 40;
 static constexpr int ADC_HIGH_LIMIT = 4055;
 
 static constexpr uint32_t LED_FREQUENCY_HZ = 1000;
 static constexpr uint32_t MOTOR_FREQUENCY_HZ = 20000;
 
-static constexpr uint32_t LED_MAX_DUTY = 255;    // 8 bits
-static constexpr uint32_t MOTOR_MAX_DUTY = 1023; // 10 bits
+static constexpr ledc_timer_bit_t LED_RESOLUTION = LEDC_TIMER_8_BIT;
+static constexpr ledc_timer_bit_t MOTOR_RESOLUTION = LEDC_TIMER_10_BIT;
+
+static constexpr uint32_t LED_MAX_DUTY = (1u << static_cast<uint32_t>(LED_RESOLUTION)) - 1u;
+static constexpr uint32_t MOTOR_MAX_DUTY = (1u << static_cast<uint32_t>(MOTOR_RESOLUTION)) - 1u;
 
 static constexpr uint32_t UPDATE_INTERVAL_MS = 20;
 
@@ -66,14 +66,6 @@ static adc_oneshot_unit_handle_t init_adc()
 
 static uint32_t adc_to_duty(int reading, uint32_t max_duty)
 {
-    if (reading < 0) {
-        reading = 0;
-    }
-
-    if (reading > ADC_MAX_VALUE) {
-        reading = ADC_MAX_VALUE;
-    }
-
     if (reading <= ADC_LOW_LIMIT) {
         return 0;
     }
@@ -97,7 +89,7 @@ static void init_led_pwm(pwm_t *led_pwm)
     config.channel = LEDC_CHANNEL_0;
     config.timer = LEDC_TIMER_0;
     config.frequency_hz = LED_FREQUENCY_HZ;
-    config.resolution = LEDC_TIMER_8_BIT;
+    config.resolution = LED_RESOLUTION;
     config.duty = 0;
     config.inverted = false;
 
@@ -112,7 +104,7 @@ static void init_motor_pwm(pwm_t *motor_pwm)
     config.channel = LEDC_CHANNEL_1;
     config.timer = LEDC_TIMER_1;
     config.frequency_hz = MOTOR_FREQUENCY_HZ;
-    config.resolution = LEDC_TIMER_10_BIT;
+    config.resolution = MOTOR_RESOLUTION;
     config.duty = 0;
     config.inverted = false;
 
